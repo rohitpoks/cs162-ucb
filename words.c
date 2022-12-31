@@ -89,7 +89,6 @@ struct word_count*  merge(struct word_count* l1, struct word_count* l2) {
 struct word_count* mergeSort(struct word_count* head) {
   // get the first and middle nodes
   int count = node_count(head);
-  printf("count = %d\n", count);
   // base case -> if one node
   if (count == 1) return head;
   // recursive case
@@ -104,8 +103,8 @@ struct word_count* mergeSort(struct word_count* head) {
   prev->next = NULL;
   struct word_count* second_head = calloc(1, sizeof(struct word_count));
   second_head->next = l2;
-  mergeSort(head);
-  mergeSort(second_head);
+  head = mergeSort(head);
+  second_head = mergeSort(second_head);
   return merge(head, second_head);
 }
 
@@ -200,8 +199,12 @@ int main() {
   /* print_list(result); */
   
   // free up memory
-  head = mergeSort(head);
-  //print_list(head);
-  //free(currentWord);
-  //free_list(head);
+  printf("this is the initial state of the linked list\n");
+  print_list(head);
+  printf("--------------------------------------\n");
+  printf("the sorted linked list is\n");
+  struct word_count* result = mergeSort(head);
+  print_list(result);
+  free(currentWord);
+  free_list(result);
 }
