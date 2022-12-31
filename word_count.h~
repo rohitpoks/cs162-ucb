@@ -1,0 +1,5 @@
+struct word_count {
+  char* word;
+  int freq;
+  word_count *next;
+};

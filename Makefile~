@@ -1,0 +1,10 @@
+TARGETS=words
+
+CFLAGS=-g -pedantic -Wall -Wextra
+
+CC=gcc
+
+all: $(TARGETS)
+
+words: word_count.c
+	$(CC) $(CFLAGS) -o word_count word_count.c

@@ -1,0 +1,205 @@
+#include "word_count.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <ctype.h>
+#include <string.h>
+
+void print_list(struct word_count* head) {
+  struct word_count* current = head->next;
+  while (current != NULL) {
+    printf("word = %s, freq = %d\n", current->word, current -> freq);
+    current = current->next;
+  }
+}
+
+void clean_word(char* word) {
+  for (size_t i = 0; i < strlen(word); i++) {
+    word[i] = tolower(word[i]);
+  }
+}
+
+int addToExisting(char* word, struct word_count* head) {
+  struct word_count* current = head->next;
+  while (current != NULL) {
+    if (strcmp(current->word, word) == 0) {
+      current->freq++;
+      return 1;
+    }
+    current = current->next;
+  }
+  return 0;
+}
+
+
+void free_list(struct word_count* head) {
+  struct word_count* current = head;
+  while (current != NULL) {
+    struct word_count* next = current->next;
+    free(current->word);
+    free(current);
+    current = next;
+  }
+}
+
+// returns node count excluding sentinel head
+int node_count(struct word_count* head) {
+  if (head == NULL) return -1;
+  return 1 + node_count(head->next);
+}
+
+
+struct word_count*  merge(struct word_count* l1, struct word_count* l2) {
+  struct word_count* l3 = calloc(1, sizeof(struct word_count));
+  struct word_count* result = l3;
+  struct word_count* prev1 = l1;
+  struct word_count* prev2 = l2;
+  l1 = l1->next;
+  l2 = l2->next;
+  prev1->next = NULL;
+  prev2->next = NULL;
+  free_list(prev1);
+  free_list(prev2);
+  
+  while (l1 != NULL && l2 != NULL) {
+    if (l1->freq < l2->freq) {
+      l3->next = l1;
+      l1 = l1->next;
+    } else {
+      l3->next = l2;
+      l2 = l2->next;
+    }
+    l3 = l3->next;
+  }
+  while (l1 != NULL) {
+    l3->next = l1;
+    l1 = l1->next;
+    l3 = l3->next;
+  }
+  while (l2 != NULL) {
+    l3->next = l2;
+    l2 = l2->next;
+    l3 = l3->next;
+  }
+ 
+  return result;
+}
+
+
+struct word_count* mergeSort(struct word_count* head) {
+  // get the first and middle nodes
+  int count = node_count(head);
+  // base case -> if one node
+  if (count == 1) return head;
+  // recursive case
+  struct word_count* l1 = head->next;
+  
+  struct word_count* l2 = l1;
+  for (int i = 1; i < count / 2; i++) {
+    l2 = l2->next;
+  }
+  struct word_count* prev = l2;
+  l2 = l2->next;
+  prev->next = NULL;
+  struct word_count* second_head = calloc(1, sizeof(struct word_count));
+  second_head->next = l2;
+  mergeSort(head);
+  mergeSort(second_head);
+  return merge(head, second_head);
+}
+
+int main() {
+  struct word_count* head = calloc(1, sizeof(struct word_count));
+  struct word_count* prev = head;
+  char c = getchar();
+  char* currentWord = calloc(1024, sizeof(char));
+  int size = 0;
+  while (c != -1) {
+    // keep making a new word
+    if (isspace(c)) {
+      currentWord[size] = '\0';
+      clean_word(currentWord);
+      int clean = 1;
+      if (!addToExisting(currentWord, head)) {
+	clean = 0;
+	struct word_count* current = calloc(1, sizeof(struct word_count));
+	prev->next = current;
+	current->word = currentWord;
+	prev = current;
+	current->freq = 1;
+      }
+      if (clean) free(currentWord);
+      currentWord = calloc(1024, sizeof(char));
+      size = 0;
+    } else {
+      currentWord[size] = c;
+      size++;
+    }
+    c = getchar();
+  }
+  // testing begins here
+  
+  /* struct word_count* head2 = calloc(1, sizeof(struct word_count)); */
+  /* struct word_count* h2 = head2; */
+  /* struct word_count* current = calloc(1, sizeof(struct word_count)); */
+  /* current->word = "abc"; */
+  /* head2->next = current; */
+  /* current->freq = 4; */
+  /* head2 = current; */
+  
+  /* current = calloc(1, sizeof(struct word_count)); */
+  /* current->word = "def"; */
+  /* head2->next =	current; */
+  /* current->freq = 6; */
+  /* head2 = current; */
+
+  /* current = calloc(1, sizeof(struct word_count)); */
+  /* current->word = "abc"; */
+  /* head2->next = current; */
+  /* current->freq = 8; */
+  /* head2=current; */
+
+  /* current = calloc(1, sizeof(struct word_count)); */
+  /* current->word = "def"; */
+  /* head2->next = current; */
+  /* current->freq = 10; */
+  /* head2=current; */
+
+  /* struct word_count* head3 = calloc(1, sizeof(struct word_count)); */
+  /* struct word_count* h3 = head3; */
+  /* struct word_count* current3 = calloc(1, sizeof(struct word_count)); */
+  
+  /* current3->word = "abc"; */
+  /* head3->next = current3; */
+  /* current3->freq = 5; */
+  /* head3 = current3; */
+
+  /* current3 = calloc(1, sizeof(struct word_count)); */
+  /* current3->word = "def"; */
+  /* head3->next = current3; */
+  /* current3->freq = 7; */
+  /* head3 = current3; */
+
+  /* current3 = calloc(1, sizeof(struct word_count)); */
+  /* current3->word = "abc"; */
+  /* head3->next = current3; */
+  /* current3->freq = 9; */
+  /* head3=current3; */
+
+  /* current3 = calloc(1, sizeof(struct word_count)); */
+  /* current3->word = "def"; */
+  /* head3->next = current3; */
+  /* current3->freq = 11; */
+  /* head3=current3; */
+
+  /* printf("second list is\n"); */
+  /* print_list(h3); */
+  /* printf("----\n"); */
+  /* struct word_count* result = merge(h2, h3); */
+  /* print_list(result); */
+  
+  // free up memory
+  head = mergeSort(head);
+  //print_list(head);
+  //free(currentWord);
+  //free_list(head);
+}
